@@ -1,3 +1,36 @@
 @tailwind base;
 @tailwind components;
+<<<<<<< HEAD
 @tailwind utilities;
+=======
+@tailwind utilities;
+
+/* Custom styles for premium theme */
+.bg-premium-gradient {
+  background: linear-gradient(135deg, #1C1C1E 0%, #2C2C2E 100%);
+}
+
+.bg-card-mocha {
+  background-color: #2C2C2E;
+}
+
+.bg-card-charcoal {
+  background-color: #1C1C1E;
+}
+
+.text-offwhite {
+  color: #F2F2F7;
+}
+
+.text-warmgrey {
+  color: #A1A1AA;
+}
+
+.bg-gold-accent {
+  background-color: #F5B700;
+}
+
+.bg-emerald-accent {
+  background-color: #2ECC71;
+}
+>>>>>>> 6ec9ce1 (added home page ui)
