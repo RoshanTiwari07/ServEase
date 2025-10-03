@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-import "./global.css"
-import { Text, View } from "react-native";
- 
-export default function App() {
-  return (
-    <View className="flex-1 items-center justify-center bg-red-100">
-      <Text className="text-xl font-bold text-blue-500">
-        Welcome to Nativewind!
-      </Text>
-=======
 import { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -166,7 +155,6 @@ export default function HomeScreen() {
       <TouchableOpacity className="absolute bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full items-center justify-center shadow-lg">
         <Ionicons name="add" size={24} color="#FFFFFF" />
       </TouchableOpacity>
->>>>>>> 6ec9ce1 (added home page ui)
     </View>
   );
 }
