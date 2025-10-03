@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import ProviderCard from '@/components/ProviderCard';
+import { useState } from 'react';
+import { FlatList, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import ProviderCard from '../../components/ProviderCard';
 
 // Dummy data for providers
 const dummyProviders = [
@@ -125,7 +125,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Nearby Providers Section */}
-        <View className="px-6 pt-8 pb-20">
+        <View className="px-6 pt-8 pb-32">
           <View className="flex-row justify-between items-center mb-4">
             <Text className="text-offwhite-50 text-lg font-semibold">Nearby Providers</Text>
             <Text className="text-gold-accent text-sm">Trusted First</Text>
@@ -152,7 +152,7 @@ export default function HomeScreen() {
       </ScrollView>
 
       {/* Floating Action Button */}
-      <TouchableOpacity className="absolute bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full items-center justify-center shadow-lg">
+      <TouchableOpacity className="absolute bottom-28 right-6 w-16 h-16 bg-gold-accent rounded-full items-center justify-center shadow-lg">
         <Ionicons name="add" size={24} color="#FFFFFF" />
       </TouchableOpacity>
     </View>

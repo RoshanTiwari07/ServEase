@@ -4,9 +4,6 @@ module.exports = {
   content: ["./app/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"],
   presets: [require("nativewind/preset")],
   theme: {
-<<<<<<< HEAD
-    extend: {},
-=======
     extend: {
       colors: {
         charcoal: {
@@ -18,6 +15,7 @@ module.exports = {
         },
         gold: {
           50: '#F5B700', // Accent Gold/Saffron
+          accent: '#F5B700', // Alternative alias
         },
         emerald: {
           50: '#2ECC71', // Accent Emerald Green
@@ -30,7 +28,6 @@ module.exports = {
         },
       },
     },
->>>>>>> 6ec9ce1 (added home page ui)
   },
   plugins: [],
 }

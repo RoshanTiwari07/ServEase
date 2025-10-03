@@ -1,13 +1,10 @@
 @tailwind base;
 @tailwind components;
-<<<<<<< HEAD
-@tailwind utilities;
-=======
 @tailwind utilities;
 
 /* Custom styles for premium theme */
 .bg-premium-gradient {
-  background: linear-gradient(135deg, #1C1C1E 0%, #2C2C2E 100%);
+  background-color: #1C1C1E;
 }
 
 .bg-card-mocha {
@@ -33,4 +30,3 @@
 .bg-emerald-accent {
   background-color: #2ECC71;
 }
->>>>>>> 6ec9ce1 (added home page ui)
