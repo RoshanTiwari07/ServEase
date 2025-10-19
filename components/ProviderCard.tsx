@@ -1,5 +1,6 @@
-import { View, Text, Image, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
+import React from "react";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
 interface ProviderCardProps {
   name: string;
@@ -9,83 +10,91 @@ interface ProviderCardProps {
   trustScore: number;
   service: string;
   avatar?: string;
+  onPress: () => void;
+  onCall: () => void;
+  onChat: () => void;
 }
 
-export default function ProviderCard({ 
-  name, 
-  rating, 
-  price, 
-  distance, 
-  trustScore, 
+const ProviderCard: React.FC<ProviderCardProps> = ({
+  name,
+  rating,
+  price,
+  distance,
+  trustScore,
   service,
-  avatar 
-}: ProviderCardProps) {
+  avatar,
+  onPress,
+  onCall,
+  onChat,
+}) => {
   return (
-    <View className="bg-mocha-50 rounded-2xl p-4 mb-4 shadow-lg">
-      {/* Top Row: Avatar, Name, Trust Badge, Distance */}
-      <View className="flex-row items-center justify-between mb-3">
-        <View className="flex-row items-center flex-1">
-          {/* Avatar */}
-          <View className="w-12 h-12 bg-charcoal-50 rounded-full items-center justify-center mr-3">
-            {avatar ? (
-              <Image source={{ uri: avatar }} className="w-10 h-10 rounded-full" />
-            ) : (
-              <Ionicons name="person" size={20} color="#F2F2F7" />
-            )}
-          </View>
-          
-          {/* Name and Service */}
-          <View className="flex-1">
-            <Text className="text-offwhite-50 font-semibold text-base">{name}</Text>
-            <Text className="text-warmgrey-50 text-sm">{service}</Text>
-          </View>
-        </View>
-        
-        {/* Trust Badge and Distance */}
-        <View className="items-end">
-          {trustScore >= 4.5 && (
-            <View className="bg-gold-accent px-2 py-1 rounded-full mb-1">
-              <Text className="text-charcoal-50 text-xs font-bold">Trusted ⭐</Text>
-            </View>
+    <TouchableOpacity
+      onPress={onPress}
+      className="bg-mocha-50 rounded-2xl p-4 mb-3 border border-gold-accent/20"
+      activeOpacity={0.8}
+    >
+      <View className="flex-row items-center">
+        {/* Avatar */}
+        <View className="w-16 h-16 rounded-full overflow-hidden bg-charcoal-50 items-center justify-center">
+          {avatar ? (
+            <Image source={{ uri: avatar }} className="w-full h-full" />
+          ) : (
+            <Ionicons name="person" size={24} color="#F5B700" />
           )}
-          <View className="flex-row items-center">
-            <Ionicons name="location" size={12} color="#A1A1AA" />
-            <Text className="text-warmgrey-50 text-xs ml-1">{distance}</Text>
+        </View>
+
+        {/* Provider Info */}
+        <View className="flex-1 ml-4">
+          <View className="flex-row items-center justify-between mb-1">
+            <Text className="text-offwhite-50 text-lg font-semibold">
+              {name}
+            </Text>
+            <View className="flex-row items-center">
+              <Ionicons name="star" size={14} color="#F5B700" />
+              <Text className="text-gold-accent text-sm ml-1">{rating}</Text>
+            </View>
+          </View>
+
+          <Text className="text-warmgrey-50 text-sm mb-2">{service}</Text>
+
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center space-x-4">
+              <Text className="text-gold-accent text-sm font-medium">
+                ₹{price}
+              </Text>
+              <Text className="text-warmgrey-50 text-sm">{distance}</Text>
+            </View>
+
+            {/* Trust Score */}
+            <View className="bg-gold-accent/20 px-2 py-1 rounded-full">
+              <Text className="text-gold-accent text-xs font-medium">
+                Trust: {trustScore}
+              </Text>
+            </View>
           </View>
         </View>
       </View>
 
-      {/* Middle: Service Category Tag */}
-      <View className="mb-3">
-        <View className="bg-charcoal-50 px-3 py-1 rounded-full self-start">
-          <Text className="text-offwhite-50 text-xs font-medium">{service}</Text>
-        </View>
-      </View>
+      {/* Action Buttons */}
+      <View className="flex-row items-center justify-end mt-3 space-x-2">
+        <TouchableOpacity
+          onPress={onChat}
+          className="bg-charcoal-50 px-4 py-2 rounded-full flex-row items-center"
+        >
+          <Ionicons name="chatbubble-outline" size={16} color="#F5B700" />
+          <Text className="text-gold-accent text-sm ml-1">Chat</Text>
+        </TouchableOpacity>
 
-      {/* Bottom Row: Rating, Price, Action Buttons */}
-      <View className="flex-row justify-between items-center">
-        {/* Rating */}
-        <View className="flex-row items-center">
-          <Ionicons name="star" size={14} color="#F5B700" />
-          <Text className="text-offwhite-50 text-sm ml-1">{rating}</Text>
-        </View>
-        
-        {/* Price */}
-        <View className="flex-row items-center">
-          <Ionicons name="cash" size={14} color="#2ECC71" />
-          <Text className="text-emerald-50 text-sm font-medium ml-1">₹{price}+</Text>
-        </View>
-        
-        {/* Action Buttons */}
-        <View className="flex-row space-x-2">
-          <TouchableOpacity className="w-8 h-8 bg-charcoal-50 rounded-full items-center justify-center">
-            <Ionicons name="chatbubble" size={14} color="#F2F2F7" />
-          </TouchableOpacity>
-          <TouchableOpacity className="w-8 h-8 bg-gold-accent rounded-full items-center justify-center">
-            <Ionicons name="call" size={14} color="#1C1C1E" />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          onPress={onCall}
+          className="bg-gold-accent px-4 py-2 rounded-full flex-row items-center"
+        >
+          <Ionicons name="call" size={16} color="#1C1C1E" />
+          <Text className="text-charcoal-50 text-sm ml-1">Call</Text>
+        </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
-}
+};
+
+export default ProviderCard;
