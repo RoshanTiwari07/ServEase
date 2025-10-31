@@ -13,6 +13,7 @@ interface ProviderCardProps {
   onPress: () => void;
   onCall: () => void;
   onChat: () => void;
+  onBook: () => void;
 }
 
 const ProviderCard: React.FC<ProviderCardProps> = ({
@@ -26,6 +27,7 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
   onPress,
   onCall,
   onChat,
+  onBook,
 }) => {
   return (
     <TouchableOpacity
@@ -79,18 +81,26 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
       <View className="flex-row items-center justify-end mt-3 space-x-2">
         <TouchableOpacity
           onPress={onChat}
-          className="bg-charcoal-50 px-4 py-2 rounded-full flex-row items-center"
+          className="bg-charcoal-50 px-3 py-2 rounded-full flex-row items-center"
         >
-          <Ionicons name="chatbubble-outline" size={16} color="#F5B700" />
-          <Text className="text-gold-accent text-sm ml-1">Chat</Text>
+          <Ionicons name="chatbubble-outline" size={14} color="#F5B700" />
+          <Text className="text-gold-accent text-xs ml-1">Chat</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={onCall}
-          className="bg-gold-accent px-4 py-2 rounded-full flex-row items-center"
+          className="bg-charcoal-50 px-3 py-2 rounded-full flex-row items-center"
         >
-          <Ionicons name="call" size={16} color="#1C1C1E" />
-          <Text className="text-charcoal-50 text-sm ml-1">Call</Text>
+          <Ionicons name="call" size={14} color="#F5B700" />
+          <Text className="text-gold-accent text-xs ml-1">Call</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={onBook}
+          className="bg-gold-accent px-3 py-2 rounded-full flex-row items-center"
+        >
+          <Ionicons name="calendar" size={14} color="#1C1C1E" />
+          <Text className="text-charcoal-50 text-xs ml-1 font-medium">Book</Text>
         </TouchableOpacity>
       </View>
     </TouchableOpacity>

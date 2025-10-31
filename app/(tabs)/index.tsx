@@ -2,24 +2,25 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  Image,
-  Linking,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    Image,
+    Linking,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import ProviderCard from "../../components/ProviderCard";
 import ServiceCategoryCard from "../../components/ServiceCategoryCard";
 import { Provider } from "../../data/servicesData";
 import {
-  useServiceCategories,
-  useTopProviders,
+    useServiceCategories,
+    useTopProviders,
 } from "../../hooks/useSQLiteData";
 
+import { useUserBookings } from "../../hooks/useBookings";
 import { useDatabase } from "../../hooks/useDatabase";
 
 export default function HomeScreen() {
@@ -41,6 +42,9 @@ export default function HomeScreen() {
     loading: categoriesLoading,
     error: categoriesError,
   } = useServiceCategories();
+  
+  // Booking hook
+  const { createBooking } = useUserBookings();
 
   // Sort providers by trustScore (highest first)
   const sortedProviders = [...providers].sort(
@@ -79,6 +83,61 @@ export default function HomeScreen() {
         {
           text: "View Details",
           onPress: () => console.log("View details for", provider.name),
+        },
+      ]
+    );
+  };
+
+  const handleBookProvider = async (provider: Provider) => {
+    Alert.alert(
+      "Book Service",
+      `Book ${provider.service} with ${provider.name}?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Book Now",
+          onPress: async () => {
+            try {
+              // Create booking data
+              const tomorrow = new Date();
+              tomorrow.setDate(tomorrow.getDate() + 1);
+              
+              const bookingData = {
+                user_id: 'user_123',
+                provider_name: provider.name,
+                service: provider.service,
+                date: tomorrow.toISOString().split('T')[0], // YYYY-MM-DD format
+                time: '10:00 AM',
+                status: 'upcoming' as const,
+                price: provider.price,
+                address: 'Your Address', // In a real app, this would come from user profile
+                provider_image: provider.avatar,
+              };
+
+              await createBooking(bookingData);
+              
+              Alert.alert(
+                "Booking Confirmed! 🎉",
+                `Your ${provider.service} appointment with ${provider.name} has been booked for ${tomorrow.toLocaleDateString()} at 10:00 AM.`,
+                [
+                  { text: "OK" },
+                  {
+                    text: "View Bookings",
+                    onPress: () => {
+                      // @ts-ignore
+                      navigation.navigate("booking");
+                    },
+                  },
+                ]
+              );
+            } catch (error) {
+              Alert.alert(
+                "Booking Failed",
+                "Sorry, we couldn't create your booking. Please try again.",
+                [{ text: "OK" }]
+              );
+            }
+          },
         },
       ]
     );
@@ -288,6 +347,7 @@ export default function HomeScreen() {
                       onPress={() => handleProviderPress(item)}
                       onCall={() => handleCall(item)}
                       onChat={() => console.log("Chat with", item.name)}
+                      onBook={() => handleBookProvider(item)}
                     />
                   )}
                   scrollEnabled={false}

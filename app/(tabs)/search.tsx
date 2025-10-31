@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { sampleProviders, serviceCategories } from '../../data/servicesData';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useProviderSearch, useServiceCategories, useTopProviders } from '../../hooks/useSQLiteData';
 
 type Suggestion = {
   type: 'provider' | 'service' | 'category';
@@ -10,17 +11,7 @@ type Suggestion = {
   category?: string;
 };
 
-// Transform providers data for search
-const servicesData = sampleProviders.map(provider => ({
-  id: provider.id,
-  name: provider.name,
-  service: provider.service,
-  rating: provider.rating,
-  price: provider.price,
-  distance: provider.distance,
-  image: provider.avatar || `https://picsum.photos/seed/${provider.name}/200/200`,
-  category: provider.category
-}));
+
 
 
 
@@ -29,9 +20,31 @@ export default function SearchScreen() {
   const searchInputRef = useRef<TextInput>(null);
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [services, setServices] = useState(servicesData);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+
+  // SQLite data hooks with error handling
+  const { providers: searchResults, loading: searchLoading, error: searchError } = useProviderSearch(searchQuery);
+  const { providers: topProviders, loading: providersLoading, error: providersError } = useTopProviders(50);
+  const { categories, loading: categoriesLoading, error: categoriesError } = useServiceCategories();
+
+  // Use search results if there's a query, otherwise show top providers
+  const displayProviders = searchQuery.trim() ? searchResults : topProviders;
+  
+  // Check for any errors
+  const hasError = searchError || providersError || categoriesError;
+
+  // Transform providers data for display
+  const services = displayProviders.map(provider => ({
+    id: provider.id,
+    name: provider.name,
+    service: provider.service,
+    rating: provider.rating,
+    price: provider.price,
+    distance: provider.distance,
+    image: provider.avatar || `https://picsum.photos/seed/${provider.name}/200/200`,
+    category: provider.category
+  }));
 
   // Handle incoming search query from navigation
   useEffect(() => {
@@ -70,7 +83,7 @@ export default function SearchScreen() {
     });
     
     // Search in service categories
-    serviceCategories.forEach(category => {
+    categories.forEach(category => {
       if (category.name.toLowerCase().includes(query.toLowerCase())) {
         allSuggestions.push({ type: 'category', text: category.name });
       }
@@ -89,13 +102,8 @@ export default function SearchScreen() {
     return uniqueSuggestions.slice(0, 8); // Limit to 8 suggestions
   };
 
-  // Filter services based on search query only
-  const filteredServices = services.filter(service => {
-    if (searchQuery.length === 0) return true; // Show all if no search query
-    return service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           service.service.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           service.category.toLowerCase().includes(searchQuery.toLowerCase());
-  });
+  // Services are already filtered by the SQLite search hook
+  const filteredServices = services;
 
   // Handle search input change
   const handleSearchChange = (text: string) => {
@@ -116,22 +124,20 @@ export default function SearchScreen() {
   };
 
   return (
-    <View className="flex-1 bg-charcoal-50">
+    <SafeAreaView className="flex-1 bg-charcoal-50" edges={['top']}>
       {/* Header */}
-      {(params.query || searchQuery) && (
-        <View className="bg-premium-gradient pb-4 rounded-b-3xl">
-          <View className="px-6 pt-12">
-            <Text className="text-offwhite-50 text-lg font-semibold">Search Results</Text>
-            <Text className="text-warmgrey-50 text-sm">
-              {params.query ? `Searching for "${params.query}"` : 
-               searchQuery ? `Results for "${searchQuery}"` : 'Search for services'}
-            </Text>
-          </View>
+      <View className="bg-premium-gradient pb-6 rounded-b-3xl">
+        <View className="px-6 pt-4">
+          <Text className="text-offwhite-50 text-2xl font-bold mb-2">Search</Text>
+          <Text className="text-warmgrey-50 text-sm">
+            {params.query ? `Searching for "${params.query}"` : 
+             searchQuery ? `Results for "${searchQuery}"` : 'Find services and providers'}
+          </Text>
         </View>
-      )}
+      </View>
 
       {/* Search Bar */}
-      <View className={`flex-row items-center bg-mocha-50 rounded-full px-4 py-3 mx-4 border border-gold-accent/30 ${params.query ? 'mt-4' : 'mt-3'}`}>
+      <View className="flex-row items-center bg-mocha-50 rounded-full px-4 py-3 mx-4 mt-4 border border-gold-accent/30">
         <Ionicons name="search" size={20} color="#F5B700" />
         <TextInput
           ref={searchInputRef}
@@ -162,9 +168,30 @@ export default function SearchScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Quick Filters */}
+      {!searchQuery && !showSuggestions && (
+        <View className="px-4 mt-4">
+          <Text className="text-offwhite-50 text-sm font-medium mb-3">Popular Services</Text>
+          <View className="flex-row flex-wrap gap-2">
+            {['Plumbing', 'Cleaning', 'Electrical', 'Carpenter', 'Beauty', 'Appliance'].map((service) => (
+              <TouchableOpacity
+                key={service}
+                onPress={() => {
+                  setSearchQuery(service);
+                  handleSearchChange(service);
+                }}
+                className="bg-charcoal-50 px-4 py-2 rounded-full border border-gold-accent/30"
+              >
+                <Text className="text-gold-accent text-sm">{service}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      )}
+
       {/* Search Suggestions */}
       {showSuggestions && suggestions.length > 0 && (
-        <View className="absolute top-full left-4 right-4 bg-mocha-50 rounded-lg mt-1 border border-gold-accent/30 z-50 shadow-lg">
+        <View className="bg-mocha-50 rounded-lg mx-4 mt-2 border border-gold-accent/30 shadow-lg">
           <FlatList
             data={suggestions}
             keyExtractor={(item, index) => index.toString()}
@@ -191,22 +218,66 @@ export default function SearchScreen() {
 
 
 
-      {/* Results Grid */}
-      {filteredServices.length > 0 ? (
-        <View>
-          <View className="px-4 mb-2">
-            <Text className="text-warmgrey-50 text-xs text-center">
-              Tap any card to filter by that service
-            </Text>
+      {/* Loading State */}
+      {(providersLoading || searchLoading || categoriesLoading) && (
+        <View className="flex-1 items-center justify-center">
+          <View className="bg-mocha-50 rounded-full p-4 mb-4">
+            <Ionicons name="search" size={32} color="#F5B700" />
           </View>
-        <FlatList
-          data={filteredServices}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 120 }}
-          columnWrapperStyle={{ justifyContent: 'space-between', marginBottom: 12 }}
-          scrollEnabled={true}
-          showsVerticalScrollIndicator={false}
+          <Text className="text-warmgrey-50">
+            {searchQuery ? 'Searching...' : 'Loading services...'}
+          </Text>
+        </View>
+      )}
+
+      {/* Error State */}
+      {hasError && (
+        <View className="flex-1 items-center justify-center px-8">
+          <View className="bg-red-500/10 rounded-full p-4 mb-4">
+            <Ionicons name="alert-circle" size={32} color="#FF6B6B" />
+          </View>
+          <Text className="text-offwhite-50 text-lg font-semibold text-center">
+            Something went wrong
+          </Text>
+          <Text className="text-warmgrey-50 text-sm text-center mt-2">
+            {searchError || providersError || categoriesError}
+          </Text>
+        </View>
+      )}
+
+      {/* No Results State */}
+      {!hasError && !providersLoading && !searchLoading && !categoriesLoading && displayProviders.length === 0 && searchQuery && (
+        <View className="flex-1 items-center justify-center px-8">
+          <View className="bg-warmgrey-50/10 rounded-full p-4 mb-4">
+            <Ionicons name="search-outline" size={32} color="#A1A1AA" />
+          </View>
+          <Text className="text-offwhite-50 text-lg font-semibold text-center">
+            No results found
+          </Text>
+          <Text className="text-warmgrey-50 text-sm text-center mt-2">
+            Try searching for different keywords or check your spelling.
+          </Text>
+        </View>
+      )}
+
+      {/* Results Grid */}
+      {!hasError && !providersLoading && !searchLoading && !categoriesLoading && (
+        <View className="flex-1 mt-4">
+          {filteredServices.length > 0 ? (
+            <View className="flex-1">
+              <View className="px-4 mb-3">
+                <Text className="text-warmgrey-50 text-xs text-center">
+                  Tap any card to filter by that service • {filteredServices.length} results
+                </Text>
+              </View>
+            <FlatList
+              data={filteredServices}
+              keyExtractor={(item) => item.id}
+              numColumns={2}
+              contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 120 }}
+              columnWrapperStyle={{ justifyContent: 'space-between', marginBottom: 12 }}
+              scrollEnabled={true}
+              showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <TouchableOpacity 
               className="bg-mocha-50 rounded-2xl p-4 border border-gold-accent/30"
@@ -245,27 +316,35 @@ export default function SearchScreen() {
               </View>
             </TouchableOpacity>
           )}
-        />
-        </View>
-      ) : (
-        <View className="flex-1 items-center justify-center px-8">
-          <Ionicons name="search-outline" size={64} color="#A1A1AA" />
-          <Text className="text-offwhite-50 text-lg font-semibold mt-4 text-center">
-            No services found
-          </Text>
-          <Text className="text-warmgrey-50 text-sm text-center mt-2">
-            Try adjusting your search or filters to find what you&apos;re looking for.
-          </Text>
-          <TouchableOpacity
-            className="bg-gold-accent px-6 py-3 rounded-full mt-6"
-            onPress={() => {
-              setSearchQuery('');
-            }}
-          >
-            <Text className="text-charcoal-50 font-medium">Clear Search</Text>
-          </TouchableOpacity>
+            />
+          </View>
+        ) : (
+          <View className="flex-1 items-center justify-center px-8">
+            <Ionicons name="search-outline" size={64} color="#A1A1AA" />
+            <Text className="text-offwhite-50 text-lg font-semibold mt-4 text-center">
+              {searchQuery ? 'No services found' : 'Start searching'}
+            </Text>
+            <Text className="text-warmgrey-50 text-sm text-center mt-2">
+              {searchQuery 
+                ? 'Try adjusting your search or filters to find what you\'re looking for.'
+                : 'Search for services, providers, or categories to get started.'
+              }
+            </Text>
+            {searchQuery && (
+              <TouchableOpacity
+                className="bg-gold-accent px-6 py-3 rounded-full mt-6"
+                onPress={() => {
+                  setSearchQuery('');
+                  setShowSuggestions(false);
+                }}
+              >
+                <Text className="text-charcoal-50 font-medium">Clear Search</Text>
+              </TouchableOpacity>
+            )}
+            </View>
+          )}
         </View>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
